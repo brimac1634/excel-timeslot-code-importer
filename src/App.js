@@ -29,20 +29,26 @@ const App = () => {
     reader.readAsArrayBuffer(file)
     reader.onload = e => {
       const data = new Uint8Array(e.target.result);
-      const { SheetNames, Sheets } = XLSX.read(data, {type: 'array'})
+      const { SheetNames, Sheets } = XLSX.read(data, { type: 'array' })
       const currentSheet = Sheets[SheetNames[0]];
-      const rows  =  XLSX.utils.sheet_to_row_object_array(currentSheet);
+      const rows = XLSX.utils.sheet_to_row_object_array(currentSheet);
 
-      const parseDateExcel = excelTimestamp => {
-        const secondsInDay = 24 * 60 * 60;
-        const excelEpoch = new Date(1899, 11, 31);
-        const excelEpochAsUnixTimestamp = excelEpoch.getTime();
-        const missingLeapYearDay = secondsInDay * 1000;
-        const delta = excelEpochAsUnixTimestamp - missingLeapYearDay;
-        const excelTimestampAsUnixTimestamp = excelTimestamp * secondsInDay * 1000;
-        const parsed = excelTimestampAsUnixTimestamp + delta;
-        return isNaN(parsed) ? null : parsed;
-      };
+      const ExcelDateToJSDate = serial => {
+        const utcDays  = Math.floor(serial - 25569);
+        const utcValue = utcDays * 86400;                                        
+        const dateInfo = new Date(utcValue * 1000);
+     
+        const fractionalDay = serial - Math.floor(serial) + 0.0000001;
+     
+        let totalSeconds = Math.floor(86400 * fractionalDay);
+     
+        const seconds = totalSeconds % 60;
+        totalSeconds -= seconds;
+        const hours = Math.floor(totalSeconds / (60 * 60));
+        const minutes = Math.floor(totalSeconds / 60) % 60;
+     
+        return new Date(dateInfo.getFullYear(), dateInfo.getMonth(), dateInfo.getDate(), hours, minutes, seconds);
+     }
 
       const generateCode = (base, numOfRandom, useAlpha, useNum) => {
         const alpha = 'abcdefghijklmnopqrstuvwxyz';
@@ -67,12 +73,12 @@ const App = () => {
         return randomString;
       }
       console.log(rows)
-      
+
       const newRows = rows.map(({ code, date, start, end }) => {
         return {
           code: code ? code : generateCode(base, numOfRandom, useAlpha, useNum),
-          start: new Date(parseDateExcel(date + start)),
-          end: new Date(parseDateExcel(date + end))
+          start: ExcelDateToJSDate(date + start),
+          end: ExcelDateToJSDate(date + end)
         }
       })
 
@@ -82,28 +88,36 @@ const App = () => {
 
   const dateOptions = {
     year: '2-digit',
-    month:'2-digit',
-    day:'2-digit',
-    hour12 : true,
-    hour:  '2-digit',
+    month: '2-digit',
+    day: '2-digit',
+    hour12: true,
+    hour: '2-digit',
     minute: '2-digit',
   }
 
   return (
     <div className='app'>
+      <div className='how'>
+        <h2>How to use</h2>
+        <p>
+          Prepare an excel sheet with the following column headers, "date, start, end, timezone, code (if specific codes were requested), ".
+          If specific codes were requested for each timeslot, then include the "code" column, and skip directly to step 2.
+          If only the timeslots were requested, without specific codes, then ommit the "code" column in the excel sheet and fill out the details in step 1.
+        </p>
+      </div>
       <div className='section'>
-        <span className='step'>1.</span>
+        <h3 className='step'>1.</h3>
         <div className='group'>
-          <input 
+          <input
             className='form-input'
-            type='text' 
+            type='text'
             name='base'
-            id='base' 
+            id='base'
             value={base}
             onChange={handleSettingsChange}
           />
-          <label 
-            htmlFor='base' 
+          <label
+            htmlFor='base'
             className='form-input-label'
           >
             Entry Code Base (optional)
@@ -111,16 +125,16 @@ const App = () => {
         </div>
         <div className='col'>
           <div className='group'>
-            <input 
+            <input
               className='form-input'
-              type='number' 
+              type='number'
               name='numOfRandom'
-              id='numOfRandom' 
+              id='numOfRandom'
               value={numOfRandom}
               onChange={handleSettingsChange}
             />
-            <label 
-              htmlFor='numOfRandom' 
+            <label
+              htmlFor='numOfRandom'
               className='form-input-label'
             >
               Number of Random Characters
@@ -129,7 +143,7 @@ const App = () => {
         </div>
         <div className='col'>
           <div className='row'>
-            <input 
+            <input
               type='checkbox'
               id='useAlpha'
               name='useAlpha'
@@ -139,7 +153,7 @@ const App = () => {
             <label htmlFor='useAlpha'>Use Alphabet</label>
           </div>
           <div className='row'>
-            <input 
+            <input
               type='checkbox'
               id='useNum'
               name='useNum'
@@ -151,13 +165,13 @@ const App = () => {
         </div>
       </div>
       <div className='section'>
-        <span className='step'>2.</span>
-        <input 
+        <h3 className='step'>2.</h3>
+        <input
           className='input-file'
-          type='file' 
+          type='file'
           name='file'
-          id='upload' 
-          onChange={handleChangeFile} 
+          id='upload'
+          onChange={handleChangeFile}
           required
         />
         <label htmlFor='upload'>Choose File</label>
@@ -174,9 +188,9 @@ const App = () => {
           data.map(({ code, start, end }, i) => (
             <div key={i} className='row'>
               <span>{code}</span>
-              <span>{start.toLocaleDateString('en-US', dateOptions)}</span>
-              <span>{end.toLocaleDateString('en-US', dateOptions)}</span>
-              <span>{start.toLocaleDateString('en-US', { timeZoneName: 'short' })}</span>
+              <span>{start.toLocaleDateString('en-US', dateOptions).replace(',', '')}</span>
+              <span>{end.toLocaleDateString('en-US', dateOptions).replace(',', '')}</span>
+              <span>{start.toLocaleDateString('en-US', { timeZoneName: 'short' }).split(' ')[1]}</span>
             </div>
           ))
         }
