@@ -1,5 +1,9 @@
+* {
+  box-sizing: border-box;
+}
+
 .app {
-  width: 100%;
+  width: 100vw;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28,38 +32,110 @@
     }
   }
 
-  .input-file {
-    border: 0;
-    clip: rect(0, 0, 0, 0);
-    height: 1px;
-    overflow: hidden;
-    padding: 0;
-    position: absolute !important;
-    white-space: nowrap;
-    width: 1px;
+  .section {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
 
-    &+ label {
-      width: auto;
-      height: 40px;
-      color: black;
-      display: inline-block;
-      line-height: 38px;
-      outline: none;
-      text-transform: uppercase;
-      letter-spacing: 4px;
-      font-weight: bolder;
-      cursor: pointer;
-      border: 1px solid black;
-      border-radius: 4px;
-      padding: 0 18px;
-      font-size: 16px;
-      transition: all 200ms ease-in-out;
+    .step {
+      margin-right: 20px;
     }
 
-    &:focus + label,
-    &+ label:hover {
-        background-color: black;
-        color: white;
+    .row {
+      display: flex;
+      align-items: center;
+      
+      input {
+        margin-right: 5px;
+      }
+    }
+
+    .col {
+      display: flex;
+      flex-direction: column;
+      margin-left: 20px;
+    }
+    
+    .group {
+      position: relative;
+    
+      &:first-child {
+        margin-top: 0;
+      }
+    
+      .form-input {
+        width: auto;
+        height: 40px;
+        color: black;
+        display: inline-block;
+        line-height: 38px;
+        outline: none;
+        letter-spacing: 4px;
+        font-weight: bolder;
+        border: 1px solid black;
+        border-radius: 4px;
+        padding: 0 18px;
+        font-size: 16px;
+        transition: all 200ms ease-in-out;
+    
+        &:focus {
+          outline: none;
+        }
+      }
+    
+      input[type='password'] {
+        letter-spacing: 0.3em;
+      }
+    
+      .form-input-label {
+        color: #999;
+        background-color: white;
+        font-weight: normal;
+        position: absolute;
+        pointer-events: none;
+        padding: 0 5px;
+        left: 5px;
+        transition: 300ms ease all;
+        top: -10px;
+        font-size: 14px;
+        color: black;
+      }
+    }
+
+    .input-file {
+      border: 0;
+      clip: rect(0, 0, 0, 0);
+      height: 1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute !important;
+      white-space: nowrap;
+      width: 1px;
+  
+      &+ label {
+        width: auto;
+        height: 40px;
+        color: black;
+        display: inline-block;
+        line-height: 38px;
+        outline: none;
+        letter-spacing: 4px;
+        font-weight: bolder;
+        cursor: pointer;
+        border: 1px solid black;
+        border-radius: 4px;
+        padding: 0 18px;
+        font-size: 16px;
+        transition: all 200ms ease-in-out;
+      }
+  
+      &:focus + label,
+      &+ label:hover {
+          background-color: black;
+          color: white;
+      }
     }
   }
+
+  
 }
